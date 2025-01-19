@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+        .top-bar {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .top-bar .brand {
+            font-size: 24px;
+            font-weight: 700;
+        }
+        .top-bar .weather {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+        .top-bar .weather h2 {
+            margin: 0;
+            margin-bottom: 5px;
+            font-size: 18px;
+        }
+        .top-bar .weather p {
+            margin: 0;
+            font-size: 14px;
+        }
+        #search-form {
+            display: flex;
+            width: 50%;
+            max-width: 600px;
+            margin-top: 20px;
+        }
+        #search-input {
+            flex: 1;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #333;
+            border-radius: 5px 0 0 5px;
+            background-color: #333;
+            color: #e0e0e0;
+        }
+        #search-button {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #333;
+            border-left: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 0 5px 5px 0;
+            cursor: pointer;
+        }
+        #search-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <div class="brand">Fabril</div>
+        <div class="weather">
+            <h2>Weather</h2>
+            <p id="location">Loading...</p>
+            <p id="temperature"></p>
+            <p id="description"></p>
+        </div>
+    </div>
+    <form id="search-form" action="https://www.google.com/search" method="get">
+        <input type="text" id="search-input" name="q" placeholder="Search Google...">
+        <button type="submit" id="search-button">Search</button>
+    </form>
+    <script>
+        async function fetchWeather(lat, lon) {
+            const apiKey = '1e01d2f4805c4b5bb1e174043251901';
+            const url = `https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${lat},${lon}`;
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json();
+                document.getElementById('location').textContent = `${data.location.name}, ${data.location.country}`;
+                document.getElementById('temperature').textContent = `Temperature: ${data.current.temp_c}°C`;
+                document.getElementById('description').textContent = `${data.current.condition.text}`;
+            } catch (error) {
+                document.getElementById('location').textContent = 'Unable to fetch weather data';
+                document.getElementById('temperature').textContent = '';
+                document.getElementById('description').textContent = '';
+            }
+        }
+
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(position => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    fetchWeather(lat, lon);
+                }, () => {
+                    document.getElementById('location').textContent = 'Unable to retrieve your location';
+                });
+            } else {
+                document.getElementById('location').textContent = 'Geolocation is not supported by this browser';
+            }
+        }
+
+        getLocation();
+    </script>
+</body>
+</html>
